@@ -11,8 +11,6 @@ export default function (babel) {
           path.parentPath.isObjectProperty({ computed: true }) ||
           path.parentPath.isMemberExpression({ computed: true })
         ) {
-          // Reemplazamos toda la secuencia por el último valor
-          // Usamos cloneNode para no alterar el original accidentalmente
           path.replaceWith(t.cloneNode(lastExpression));
           return;
         }

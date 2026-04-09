@@ -3,14 +3,13 @@ import vm from "vm";
 import fs from "fs";
 const generator = _generate.default;
 // Hay que evaluar en contextos diferentes e independientes, no vale cambiar el path y evaluar de nuevo pq no da bien
-
+// e.g. debug_vm_runtime.js
 export default function (babel) {
   const { types: t } = babel;
   return {
     name: "evaluatefuncs",
     visitor: {
       Program(programPath) {
-        // Cache: functionName -> { iifeCode, arraysFunctionCode, decryptorCode }
         const cache = new Map();
 
         programPath.traverse({

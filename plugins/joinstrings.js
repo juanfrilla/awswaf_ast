@@ -8,7 +8,6 @@ export default function (babel) {
         const result = path.evaluate();
         if (result.confident) {
           const newNode = t.valueToNode(result.value);
-          // Solo reemplazar si el nodo resultante es diferente (un literal)
           if (t.isLiteral(newNode)) {
             path.replaceWith(newNode);
             path.skip();

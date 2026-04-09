@@ -11,7 +11,6 @@ if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir);
 // step1 webcrack
 const pluginPaths = [
   "./plugins/fixnumericassignments.js",
-  "./plugins/firstevaluation.js",
   "./plugins/substitutearrays.js",
   "./plugins/sequenceexpr.js",
   "./plugins/replaceconstindicts.js",

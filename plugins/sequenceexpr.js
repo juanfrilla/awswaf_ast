@@ -2,8 +2,6 @@ export default function (babel) {
   const visitorSequencer = {
     SequenceExpression(path) {
       for (const expr of path.node.expressions) {
-        // Las asignaciones: _0x1770d9 = -635
-
         if (t.isCallExpression(expr)) {
           const args = expr.arguments;
           for (var arg of args) {

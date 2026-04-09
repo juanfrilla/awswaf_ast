@@ -79,8 +79,6 @@ export default function (babel) {
               return;
 
             const targetReplaced = obj[propName];
-
-            // Reemplazamos si el valor existe en nuestra reconstrucción
             if (targetReplaced !== undefined) {
               path.replaceWith(t.valueToNode(targetReplaced));
             }

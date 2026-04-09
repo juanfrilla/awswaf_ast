@@ -7,15 +7,11 @@ export default function (babel) {
       MemberExpression(path) {
         const { node, scope } = path;
         const parent = path.parentPath;
-
-        // 1. Evitar el lado izquierdo de una asignación (ej: arr[0] = 'valor')
         if (parent.isAssignmentExpression({ left: node })) return;
-
-        // 2. Solo nos interesan accesos calculados con índice numérico: arr[0]
         if (!node.computed || !t.isNumericLiteral(node.property)) return;
 
         const targetObj = node.object;
-        if (!t.isIdentifier(targetObj)) return; // Asegurarnos que el objeto es una variable
+        if (!t.isIdentifier(targetObj)) return;
 
         const targetProp = node.property;
         const objName = targetObj.name;
@@ -46,7 +42,6 @@ export default function (babel) {
             } else if (t.isRegExpLiteral(el)) {
               path.replaceWith(t.regExpLiteral(el.pattern, el.flags));
             } else if (t.isCallExpression(el) || t.isIdentifier(el)) {
-              // Si es una función o variable, clonamos el nodo para no moverlo
               path.replaceWith(t.cloneNode(el));
             }
           }

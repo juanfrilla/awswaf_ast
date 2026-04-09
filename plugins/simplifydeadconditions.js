@@ -4,7 +4,6 @@ export default function (babel) {
   return {
     name: "simplify-dead-conditions",
     visitor: {
-      // Caso 1: if ("BhIdhHtPtV") { ... }
       IfStatement(path) {
         const test = path.get("test");
         if (test.isStringLiteral()) {
@@ -25,7 +24,6 @@ export default function (babel) {
             }
 
             if (typeof result === "number" && isNaN(result)) {
-              // Si el resultado es NaN, es "falsy"
               test.replaceWith(t.booleanLiteral(false));
             } else if (result === 0) {
               test.replaceWith(t.booleanLiteral(false));

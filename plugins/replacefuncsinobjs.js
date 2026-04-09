@@ -1,11 +1,9 @@
 export default function (babel) {
   const { types: t } = babel;
   const createNode = (val, originalName) => {
-    // Si el valor es el mismo que el nombre original, es que no se tradujo (es una variable)
     if (val === originalName) {
       return t.identifier(val);
     }
-    // Si es un valor procesado (número o string del diccionario), usamos valueToNode
     return t.valueToNode(val);
   };
   function resolveToRootBinding(currentName, scope) {

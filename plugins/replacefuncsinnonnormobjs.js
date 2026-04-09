@@ -11,14 +11,10 @@ export default function (babel) {
 
       lastBinding = binding;
       const init = binding.path.node.init;
-
-      // Si el valor inicial es otro Identificador, seguimos la cadena
       if (init && t.isIdentifier(init)) {
         currentName = init.name;
-        // Saltamos al scope donde se definió para evitar líos de shadowing
         currentScope = binding.path.scope;
       } else {
-        // Si el init no es un nombre (es un objeto, función o null), hemos terminado
         break;
       }
     }
@@ -26,11 +22,9 @@ export default function (babel) {
   }
 
   const createNode = (val, originalName) => {
-    // Si el valor es el mismo que el nombre original, es que no se tradujo (es una variable)
     if (val === originalName) {
       return t.identifier(val);
     }
-    // Si es un valor procesado (número o string del diccionario), usamos valueToNode
     return t.valueToNode(val);
   };
 
@@ -38,7 +32,6 @@ export default function (babel) {
     name: "split-variable-declarations",
     visitor: {
       CallExpression(path) {
-        // Evitar procesar el lado izquierdo de una asignación (ej: obj.prop = "valor")
 
         const node = path.node;
         const args = node.arguments;
@@ -50,13 +43,6 @@ export default function (babel) {
         if (args.length != 2) return;
         let functionArgValues = {};
 
-        //if (
-        //  args.some(
-        //    (arg) => !(t.isNumericLiteral(arg) || t.isStringLiteral(arg)),
-        //  )
-        // )
-        //   return;
-
         functionArgValues = args.map((arg) => {
           if (t.isNumericLiteral(arg) || t.isStringLiteral(arg)) {
             return arg.value;
@@ -64,8 +50,6 @@ export default function (babel) {
         });
 
         const myObj = callee.object;
-
-        // --- 2. BUSCAR EL OBJETO ---
         if (t.isIdentifier(myObj)) {
           const objName = myObj.name;
           const binding = resolveToRootBinding(objName, path.scope);
@@ -74,17 +58,13 @@ export default function (babel) {
             const initNode = declarationPath.node.init;
 
             if (t.isObjectExpression(initNode)) {
-              // Reconstruimos el objeto (solo valores estáticos)
               if (initNode.properties.length == 0) {
                 for (const refPath of binding.referencePaths) {
-                  // Buscamos el ancestro que sea una asignación: obj.prop = function
                   const assignmentPath = refPath.findParent((p) =>
                     p.isAssignmentExpression(),
                   );
 
                   if (!assignmentPath) continue;
-
-                  const left = assignmentPath.node.left;
                   const targetNode = assignmentPath.node.right;
                   if (
                     assignmentPath.node.left.object.name ==

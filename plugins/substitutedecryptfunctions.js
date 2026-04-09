@@ -60,10 +60,8 @@ export default function (babel) {
       const areAllNumeric =
         functionArguments.length > 0 &&
         functionArguments.every((arg) => {
-          // Caso 1: Es un número positivo (ej: 5)
           if (t.isNumericLiteral(arg)) return true;
 
-          // Caso 2: Es un número negativo (ej: -5)
           if (
             t.isUnaryExpression(arg, { operator: "-" }) &&
             t.isNumericLiteral(arg.argument)

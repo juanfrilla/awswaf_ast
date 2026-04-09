@@ -22,13 +22,10 @@ export default function (babel) {
       lastBinding = binding;
       const init = binding.path.node.init;
 
-      // Si el valor inicial es otro Identificador, seguimos la cadena
       if (init && t.isIdentifier(init)) {
         currentName = init.name;
-        // Saltamos al scope donde se definió para evitar líos de shadowing
         currentScope = binding.path.scope;
       } else {
-        // Si el init no es un nombre (es un objeto, función o null), hemos terminado
         break;
       }
     }
