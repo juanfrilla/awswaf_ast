@@ -2,3 +2,6 @@ node_modules/
 steps/
 todo/
 *lab*
+test_zone/
+debug_vm_runtime.js
+deobf_webcrack/

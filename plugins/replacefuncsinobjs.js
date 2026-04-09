@@ -45,12 +45,7 @@ export default function (babel) {
         if (args.length != 2) return;
         let functionArgValues = {};
 
-        //        if (
-        //          args.some(
-        //            (arg) => !(t.isNumericLiteral(arg) || t.isStringLiteral(arg)),
-        //          )
-        //        )
-        //          return;
+
         functionArgValues = args.map((arg) => {
           if (t.isNumericLiteral(arg) || t.isStringLiteral(arg)) {
             return arg.value;

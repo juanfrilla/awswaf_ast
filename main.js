@@ -8,45 +8,25 @@ const outputDir = "./steps";
 
 if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir);
 
-// mios antes
-
-// const pluginPaths = [
-//   "./plugins/hextodecimal.js",
-//   "./plugins/fixnumericassignments.js",
-//   "./plugins/evaluatestrings.js",
-//   "./plugins/splitvar.js",
-//   "./plugins/firstevaluation.js",
-//   "./plugins/inlineobjects.js",
-//   "./plugins/substitutedecryptfunctions.js",
-//   "./plugins/evaluatefuncs.js",
-//   "./plugins/joinstrings.js",
-//   "./plugins/substitutearrays.js",
-//   "./plugins/sequenceexpr.js",
-//   "./plugins/replaceindicts.js",
-//   "./plugins/memberexpression.js",
-// ];
 // step1 webcrack
 const pluginPaths = [
   "./plugins/fixnumericassignments.js",
-  // "./plugins/evaluatestrings.js",
-  // "./plugins/splitvar.js",
   "./plugins/firstevaluation.js",
-  //"./plugins/inlineobjects.js",
   "./plugins/substitutearrays.js",
   "./plugins/sequenceexpr.js",
-  "./plugins/substitutedecryptfunctions.js",
-
-  "./plugins/evaluatefuncs.js",
-  "./plugins/joinstrings.js",
-
   "./plugins/replaceconstindicts.js",
   "./plugins/replacefuncsinobjs.js",
   "./plugins/replacefuncsinnonnormobjs.js",
-  "./plugins/memberexpression.js",
+  "./plugins/objectpropinliner.js",
+  "./plugins/substitutedecryptfunctions.js",
+  "./plugins/evaluatefuncs.js",
+  "./plugins/joinstrings.js",
+  "./plugins/simplify_sentences.js",
+  "./plugins/propdecomputer.js",
+  "./plugins/simplifydeadconditions.js",
 ];
 
-// Compara dos fragmentos de código por su AST serializado, ignorando
-// posiciones y metadatos que Babel añade (loc, start, end, etc.)
+
 function astHash(code) {
   function stripMeta(node) {
     if (Array.isArray(node)) return node.map(stripMeta);
@@ -79,7 +59,6 @@ function astHash(code) {
     });
     return JSON.stringify(stripMeta(ast));
   } catch {
-    // Si no parsea, fallback a comparación de string
     return code;
   }
 }

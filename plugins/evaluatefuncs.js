@@ -27,14 +27,6 @@ export default function (babel) {
               );
             if (!areAllNumeric || !path.node.callee.name) return;
             const functionName = path.node.callee.name;
-            if (
-              functionName == "_0x3d82ab" &&
-              args[0].value == 454 //&&
-              //args[1].value == -414
-            ) {
-              debugger;
-            }
-            //(454, -414);
             if (!functionName.startsWith("_0x")) return;
 
             if (!cache.has(functionName)) {

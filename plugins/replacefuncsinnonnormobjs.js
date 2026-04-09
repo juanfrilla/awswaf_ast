@@ -25,6 +25,15 @@ export default function (babel) {
     return lastBinding;
   }
 
+  const createNode = (val, originalName) => {
+    // Si el valor es el mismo que el nombre original, es que no se tradujo (es una variable)
+    if (val === originalName) {
+      return t.identifier(val);
+    }
+    // Si es un valor procesado (número o string del diccionario), usamos valueToNode
+    return t.valueToNode(val);
+  };
+
   return {
     name: "split-variable-declarations",
     visitor: {
@@ -41,18 +50,18 @@ export default function (babel) {
         if (args.length != 2) return;
         let functionArgValues = {};
 
-        if (
-          args.some(
-            (arg) => !(t.isNumericLiteral(arg) || t.isStringLiteral(arg)),
-          )
-        )
-          return;
+        //if (
+        //  args.some(
+        //    (arg) => !(t.isNumericLiteral(arg) || t.isStringLiteral(arg)),
+        //  )
+        // )
+        //   return;
 
-        functionArgValues = args.map((arg) =>
-          t.isNumericLiteral(arg) || t.isStringLiteral(arg)
-            ? arg.value
-            : arg.argument.value,
-        );
+        functionArgValues = args.map((arg) => {
+          if (t.isNumericLiteral(arg) || t.isStringLiteral(arg)) {
+            return arg.value;
+          }
+        });
 
         const myObj = callee.object;
 
@@ -67,7 +76,6 @@ export default function (babel) {
             if (t.isObjectExpression(initNode)) {
               // Reconstruimos el objeto (solo valores estáticos)
               if (initNode.properties.length == 0) {
-                // TODO quitar este cero e iterar
                 for (const refPath of binding.referencePaths) {
                   // Buscamos el ancestro que sea una asignación: obj.prop = function
                   const assignmentPath = refPath.findParent((p) =>
@@ -99,18 +107,21 @@ export default function (babel) {
                       const arg = body.argument;
                       if (t.isBinaryExpression(arg)) {
                         const operator = arg.operator;
-                        const exprLeft = t.valueToNode(
-                          paramWithValues[arg.left.name],
-                        );
-                        const exprRight = t.valueToNode(
-                          paramWithValues[arg.right.name],
+                        const leftValue =
+                          paramWithValues[arg.left.name] || arg.left.name;
+                        const rightValue =
+                          paramWithValues[arg.right.name] || arg.right.name;
+
+                        const exprLeft = createNode(leftValue, arg.left.name);
+                        const exprRight = createNode(
+                          rightValue,
+                          arg.right.name,
                         );
                         const replBinary = t.BinaryExpression(
                           operator,
                           exprLeft,
                           exprRight,
                         );
-
                         path.replaceWith(replBinary);
                       }
                     }
