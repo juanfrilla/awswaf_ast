@@ -10,10 +10,6 @@ export const PROTO_METHODS = new Set([
 import * as t from "@babel/types";
 export function isPropMutated(binding, propKey) {
   const objName = binding.path.node.id.name;
-  //_0x591387.ZtRoE
-  if (propKey == "ZtRoE") {
-    debugger;
-  }
   for (var rp of binding.referencePaths) {
     let memberPath = rp.parentPath;
     let mutationPath = memberPath.parentPath;
