@@ -4,6 +4,8 @@ import fs from "fs";
 const generator = _generate.default;
 // Hay que evaluar en contextos diferentes e independientes, no vale cambiar el path y evaluar de nuevo pq no da bien
 // e.g. debug_vm_runtime.js
+
+// _0x3d82ab(469, 833); => "challenge_"
 export default function (babel) {
   const { types: t } = babel;
   return {

@@ -1,25 +1,6 @@
+import { evaluate } from "../utils.js";
 export default function (babel) {
   const { types: t } = babel;
-
-  function evaluate(operator, left, right) {
-    switch (operator) {
-      case "+":
-        return left + right;
-      case "-":
-        return left - right;
-      case "*":
-        return left * right;
-      case "/":
-        return left / right;
-      case "%":
-        return left % right;
-      case "**":
-        return left ** right;
-      default:
-        return null; // operadores no numéricos los dejamos sin evaluar
-    }
-  }
-
   function resolveNode(node, paramWithValues) {
     if (t.isIdentifier(node)) {
       const value = paramWithValues[node.name];

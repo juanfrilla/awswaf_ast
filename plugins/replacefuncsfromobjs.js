@@ -1,37 +1,10 @@
+import { resolveToRootBinding, createNode } from "../utils.js";
 export default function (babel) {
   const { types: t } = babel;
-  function resolveToRootBinding(currentName, scope) {
-    let lastBinding = null;
-    let currentScope = scope;
 
-    while (currentName) {
-      const binding = currentScope.getBinding(currentName);
-      if (!binding) break;
 
-      lastBinding = binding;
-      const init = binding.path.node.init;
-      if (init && t.isIdentifier(init)) {
-        currentName = init.name;
-        currentScope = binding.path.scope;
-      } else {
-        break;
-      }
-    }
-    return lastBinding;
-  }
-  const createNode = (val) => {
-    if (typeof val === "string" && val.startsWith("_0x")) {
-      return t.identifier(val);
-    }
-    if (t.isAssignmentExpression(val)) {
-      return val.right;
-    }
-    if (t.isNode(val)) {
-      return val;
-    }
-    return t.valueToNode(val);
-  };
 
+  
   return {
     name: "replace-funcs-from-dicts",
     visitor: {

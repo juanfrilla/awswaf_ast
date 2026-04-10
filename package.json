@@ -1,5 +1,6 @@
 {
   "name": "awswaf_ast",
+  "type": "module",
   "version": "1.0.0",
   "main": "main.js",
   "scripts": {

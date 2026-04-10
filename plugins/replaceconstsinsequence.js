@@ -1,4 +1,5 @@
 export default function (babel) {
+  // _0x1ce25c[ _0x17aa1a = 456, _0x5e33fb = 455, _0x1e095b(_0x5e33fb - 54, _0x17aa1a] = _0x17f8e1; => _0x1ce25c[_0x17aa1a = 456, _0x5e33fb = 455, _0x1e095b(401, 456)] = _0x17f8e1
   const visitorSequencer = {
     SequenceExpression(path) {
       for (const expr of path.node.expressions) {

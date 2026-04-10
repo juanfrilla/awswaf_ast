@@ -1,6 +1,7 @@
 export default function (babel) {
   const { types: t } = babel;
-
+  //  var _0x402862 = [0, "__generator"]; ==> 
+  //  _0x402862[1];                             "__generator";
   return {
     name: "replaceArrays",
     visitor: {

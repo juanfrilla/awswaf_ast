@@ -1,14 +1,14 @@
-const fs = require("fs");
-const path = require("path");
-const babel = require("@babel/core");
-const parser = require("@babel/parser");
+import fs from "node:fs";
+import path from "node:path";
+import { pathToFileURL } from "node:url";
+import babel from "@babel/core";
+import * as parser from "@babel/parser";
 
 const inputFile = "./deobfuscated_webcrack.js";
 const outputDir = "./steps";
 
 if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir);
 
-// step1 webcrack
 const pluginPaths = [
   "./plugins/inlinenumbers.js",
   "./plugins/replaceconstsfromarrays.js",
@@ -17,7 +17,7 @@ const pluginPaths = [
   "./plugins/replacefuncsfromobjs.js",
   "./plugins/substitutedecryptfunctions.js",
   "./plugins/evaluatefuncs.js",
-  "./plugins/joinstrings.js",
+  "./plugins/evaluatepaths.js",
   "./plugins/shortensequences.js",
   "./plugins/propdecomputer.js",
   "./plugins/simplifydeadconditions.js",
@@ -50,8 +50,9 @@ function astHash(code) {
 
   try {
     const ast = parser.parse(code, {
-      sourceType: "script",
+      sourceType: "module",
       errorRecovery: true,
+      plugins: ["jsx", "typescript"],
     });
     return JSON.stringify(stripMeta(ast));
   } catch {
@@ -59,50 +60,62 @@ function astHash(code) {
   }
 }
 
-let currentCode = fs.readFileSync(inputFile, "utf-8");
-let isChanged = true;
-let totalIterations = 0;
-const MAX_ITERATIONS = 10;
+async function runDeobfuscator() {
+  let currentCode = fs.readFileSync(inputFile, "utf-8");
+  let isChanged = true;
+  let totalIterations = 0;
+  const MAX_ITERATIONS = 10;
 
-console.log(`[+] Iniciando desofuscación iterativa: ${inputFile}`);
+  console.log(`[+] Starting iterative deobfuscation: ${inputFile}`);
 
-while (isChanged && totalIterations < MAX_ITERATIONS) {
-  totalIterations++;
-  console.log(`\n=== 🔄 INICIANDO RONDA ${totalIterations} ===`);
+  while (isChanged && totalIterations < MAX_ITERATIONS) {
+    totalIterations++;
+    console.log(`\n=== 🔄 STARTING ROUND ${totalIterations} ===`);
 
-  const hashBeforeRound = astHash(currentCode);
+    const hashBeforeRound = astHash(currentCode);
 
-  pluginPaths.forEach((pluginPath, index) => {
-    console.log(`procesando ${pluginPath}`);
-    const pluginName = path.basename(pluginPath, ".js");
-    const pluginModule = require(path.resolve(pluginPath));
-    const plugin = pluginModule.default || pluginModule;
+    // Usamos for...of para poder usar await dentro del bucle
+    for (let index = 0; index < pluginPaths.length; index++) {
+      const pluginPath = pluginPaths[index];
+      console.log(`[step ${index + 1}] processing ${pluginPath}`);
 
-    const result = babel.transformSync(currentCode, {
-      plugins: [plugin],
-      configFile: false,
-      babelrc: false,
-      generatorOpts: { jsescOption: { minimal: true }, compact: false },
-    });
+      const pluginName = path.basename(pluginPath, ".js");
 
-    currentCode = result.code;
+      // CARGA DINÁMICA ESM
+      const absolutePath = path.resolve(pluginPath);
+      const pluginUrl = pathToFileURL(absolutePath).href;
+      const pluginModule = await import(pluginUrl);
+      const plugin = pluginModule.default || pluginModule;
 
-    const stepFile = path.join(
-      outputDir,
-      `round${totalIterations}_step${index + 1}_${pluginName}.js`,
-    );
-    fs.writeFileSync(stepFile, currentCode);
-  });
+      const result = babel.transformSync(currentCode, {
+        plugins: [plugin],
+        configFile: false,
+        babelrc: false,
+        generatorOpts: { jsescOption: { minimal: true }, compact: false },
+      });
 
-  if (astHash(currentCode) === hashBeforeRound) {
-    isChanged = false;
-    console.log(`\n[✔] Punto fijo alcanzado: El código ya no cambia.`);
-  } else {
-    console.log(
-      `\n[!] El código ha cambiado en la ronda ${totalIterations}. Re-iterando...`,
-    );
+      currentCode = result.code;
+
+      const stepFile = path.join(
+        outputDir,
+        `round${totalIterations}_step${index + 1}_${pluginName}.js`,
+      );
+      fs.writeFileSync(stepFile, currentCode);
+    }
+
+    if (astHash(currentCode) === hashBeforeRound) {
+      isChanged = false;
+      console.log(`\n[✔] Fixed point reached: The code is no longer changing.`);
+    } else {
+      console.log(
+        `\n[!] The code has changed in round ${totalIterations}. Re-iterating...`,
+      );
+    }
   }
+
+  fs.writeFileSync("./output_final.js", currentCode);
+  console.log(`\n[🏁] Finished process in ${totalIterations} rounds.`);
 }
 
-fs.writeFileSync("./output_final.js", currentCode);
-console.log(`\n[🏁] Proceso finalizado en ${totalIterations} rondas.`);
+// Ejecutar el proceso
+runDeobfuscator().catch(console.error);
