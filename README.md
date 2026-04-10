@@ -64,3 +64,12 @@ The project follows a multi-stage iterative approach:
 ## ⚠️ Disclaimer
 
 This tool is intended for educational purposes and proactive security research only. Always ensure compliance with the Terms of Service of the platforms you are analyzing.
+
+
+Decir como ejecutarlo 
+node main.js
+
+decir que debug_vm_runtime.js es un ejemplo de como se desencritpa, redactar la logica de encriptacion qeu tiene
+
+primer paso webcrack 
+segundo paso node main.js y decir que es recursivo hasta que no cambie
