@@ -1,11 +1,5 @@
 export default function (babel) {
   const { types: t } = babel;
-  const createNode = (val, originalName) => {
-    if (val === originalName) {
-      return t.identifier(val);
-    }
-    return t.valueToNode(val);
-  };
   function resolveToRootBinding(currentName, scope) {
     let lastBinding = null;
     let currentScope = scope;
@@ -16,56 +10,69 @@ export default function (babel) {
 
       lastBinding = binding;
       const init = binding.path.node.init;
-
-      // Si el valor inicial es otro Identificador, seguimos la cadena
       if (init && t.isIdentifier(init)) {
         currentName = init.name;
-        // Saltamos al scope donde se definió para evitar líos de shadowing
         currentScope = binding.path.scope;
       } else {
-        // Si el init no es un nombre (es un objeto, función o null), hemos terminado
         break;
       }
     }
     return lastBinding;
   }
+  const createNode = (val) => {
+    if (typeof val === "string" && val.startsWith("_0x")) {
+      return t.identifier(val);
+    }
+    if (t.isAssignmentExpression(val)) {
+      return val.right;
+    }
+    if (t.isNode(val)) {
+      return val;
+    }
+    try {
+      return t.valueToNode(val);
+    } catch {
+      debugger;
+    }
+  };
 
   return {
     name: "split-variable-declarations",
     visitor: {
       CallExpression(path) {
-        // Evitar procesar el lado izquierdo de una asignación (ej: obj.prop = "valor")
-
         const node = path.node;
         const args = node.arguments;
         const callee = node.callee;
         if (callee.computed == undefined) return;
-        if (args.length != 2) return;
         let functionArgValues = {};
-
 
         functionArgValues = args.map((arg) => {
           if (t.isNumericLiteral(arg) || t.isStringLiteral(arg)) {
             return arg.value;
+          } else if (t.isIdentifier(arg)) {
+            return arg.name;
+          } else {
+            return arg;
           }
         });
 
         const myObj = callee.object;
-
-        // --- 2. BUSCAR EL OBJETO ---
-        if (t.isIdentifier(myObj)) {
-          const objName = myObj.name;
-          const binding = resolveToRootBinding(objName, path.scope);
-
+        const myProp = callee.property;
+        if (t.isIdentifier(myObj) && t.isIdentifier(myProp)) {
+          const originalObjName = myObj.name;
+          const originalPropName = myProp.name;
+          const binding = resolveToRootBinding(originalObjName, path.scope);
           if (binding && t.isVariableDeclarator(binding.path.node)) {
             const node = binding.path.node.init;
 
             if (t.isObjectExpression(node)) {
               for (const prop of node.properties) {
                 const targetNode = prop.value;
-                // Solo extraemos si el valor es un literal (String, Number, Boolean)
-
-                if (t.isFunctionExpression(targetNode)) {
+                const propName = prop.key.name;
+                if (
+                  t.isFunctionExpression(targetNode) &&
+                  propName == originalPropName
+                ) {
                   const functionParams = targetNode.params;
                   const functionParamNames = functionParams.map(
                     (param) => param.name,
@@ -77,24 +84,43 @@ export default function (babel) {
                     ]),
                   );
                   const body = targetNode.body.body[0];
-
                   if (t.isReturnStatement(body)) {
                     const arg = body.argument;
                     if (t.isBinaryExpression(arg)) {
                       const operator = arg.operator;
-                      const leftValue =
-                        paramWithValues[arg.left.name] || arg.left.name;
-                      const rightValue =
-                        paramWithValues[arg.right.name] || arg.right.name;
+                      const leftValue = paramWithValues[arg.left.name];
+                      const rightValue = paramWithValues[arg.right.name];
 
-                      const exprLeft = createNode(leftValue, arg.left.name);
-                      const exprRight = createNode(rightValue, arg.right.name);
+                      const exprLeft = createNode(leftValue);
+                      const exprRight = createNode(rightValue);
                       const replBinary = t.BinaryExpression(
                         operator,
                         exprLeft,
                         exprRight,
                       );
                       path.replaceWith(replBinary);
+                    } else if (t.isCallExpression(arg)) {
+                      const callee = arg.callee;
+                      const args = arg.arguments;
+                      const newArgs = [];
+
+                      const targetCallee = paramWithValues[callee.name];
+                      if (targetCallee != undefined) {
+                        for (const arg of args) {
+                          const targetReplaced = paramWithValues[arg.name];
+                          let newArg = createNode(targetReplaced);
+                          newArgs.push(newArg);
+                        }
+                        const newCallee = t.identifier(targetCallee);
+                        let replCall;
+                        try {
+                          replCall = t.callExpression(newCallee, newArgs);
+                        } catch {
+                          debugger;
+                        }
+
+                        path.replaceWith(replCall);
+                      }
                     }
                   }
                 }

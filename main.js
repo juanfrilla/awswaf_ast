@@ -15,16 +15,15 @@ const pluginPaths = [
   "./plugins/sequenceexpr.js",
   "./plugins/replaceconstindicts.js",
   "./plugins/replacefuncsinobjs.js",
-  "./plugins/replacefuncsinnonnormobjs.js",
-  "./plugins/objectpropinliner.js",
+  //"./plugins/objectpropinliner.js",
   "./plugins/substitutedecryptfunctions.js",
   "./plugins/evaluatefuncs.js",
   "./plugins/joinstrings.js",
+  "./plugins/replacefuncsinnonnormobjs.js",
   "./plugins/simplify_sentences.js",
   "./plugins/propdecomputer.js",
   "./plugins/simplifydeadconditions.js",
 ];
-
 
 function astHash(code) {
   function stripMeta(node) {

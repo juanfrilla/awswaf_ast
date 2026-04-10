@@ -11,6 +11,45 @@ const PROTO_METHODS = new Set([
 export default function (babel) {
   const { types: t } = babel;
 
+  function isPropMutated(binding, propKey) {
+    // if (propKey == "label" && binding.path.node.id.name == "_0x2cef2d") {
+    //   debugger;
+    // }
+    const objName = binding.path.node.id.name;
+
+    for (var rp of binding.referencePaths) {
+      let memberPath = rp.parentPath;
+      let mutationPath = memberPath.parentPath;
+      if (propKey == "label" && binding.path.node.id.name == "_0x2cef2d") {
+        if (!mutationPath) continue;
+
+        // Caso 1: obj.prop++ / --obj.prop
+        if (t.isUpdateExpression(mutationPath.node)) {
+          if (
+            t.isMemberExpression(memberPath.node) &&
+            (memberPath.node.object.name === objName ||
+              memberPath.node.property.name === propKey)
+          ) {
+            return true;
+          }
+        }
+
+        // Caso 2: obj.prop = valor / obj.prop += valor
+        if (t.isAssignmentExpression(mutationPath.node)) {
+          if (
+            mutationPath.node.left === memberPath.node && // <--- CRÍTICO: Comprobar que es la parte izquierda
+            memberPath.node.object.name === objName &&
+            (memberPath.node.property.name === propKey ||
+              memberPath.node.property.value === propKey)
+          ) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
   function resolveToRootBinding(currentName, scope) {
     let lastBinding = null;
     let currentScope = scope;
@@ -33,11 +72,9 @@ export default function (babel) {
   }
 
   return {
-    name: "split-variable-declarations",
+    name: "replace-const-in-dicts",
     visitor: {
       MemberExpression(path) {
-        // Evitar procesar el lado izquierdo de una asignación (ej: obj.prop = "valor")
-
         const parent = path.parentPath;
         const parentNode = parent.node;
         const operator = parentNode.operator;
@@ -53,56 +90,62 @@ export default function (babel) {
 
         const myObj = path.node.object;
         const myProp = path.node.property;
-        const myComp = path.node.computed; // true para [], false para .
+        const myComp = path.node.computed;
 
-        // --- 1. NORMALIZAR EL NOMBRE DE LA PROPIEDAD ---
         let propKey = null;
 
         if (myComp) {
-          // Caso obj["prop"] o obj[0]
           if (t.isStringLiteral(myProp) || t.isNumericLiteral(myProp)) {
             propKey = myProp.value;
           }
         } else {
-          // Caso obj.prop (aquí la propiedad siempre es un Identifier)
           if (t.isIdentifier(myProp)) {
             propKey = myProp.name;
           }
         }
 
-        // Si no pudimos determinar la propiedad, salimos
         if (propKey === null) return;
 
-        // --- 2. BUSCAR EL OBJETO ---
         if (t.isIdentifier(myObj)) {
           const objName = myObj.name;
-          const binding = resolveToRootBinding(objName, path.scope); //path.scope.getBinding(objName);
+          const binding = resolveToRootBinding(objName, path.scope);
 
           if (binding && t.isVariableDeclarator(binding.path.node)) {
-            const node = binding.path.node.init;
+            const isMutated = isPropMutated(binding, propKey);
 
+            if (isMutated) return;
+            const node = binding.path.node.init;
+            let obj = {};
             if (t.isObjectExpression(node)) {
-              // Reconstruimos el objeto (solo valores estáticos)
-              const obj = {};
               for (const prop of node.properties) {
-                // La llave del objeto definido puede ser Identifier o Literal
                 const key = t.isIdentifier(prop.key)
                   ? prop.key.name
                   : prop.key.value;
 
-                // Solo extraemos si el valor es un literal (String, Number, Boolean)
                 if (t.isLiteral(prop.value)) {
                   obj[key] = prop.value.value;
                 }
               }
-
-              // Evitar pisar métodos del prototipo (ej: obj.toString)
+              for (const rp of binding.referencePaths) {
+                const assignmentPath = rp.findParent((p) =>
+                  p.isAssignmentExpression(),
+                );
+                if (!assignmentPath) continue;
+                const targetNode = assignmentPath.node;
+                const targetNodeRight = targetNode.right;
+                const targetNodeLeft = targetNode.left;
+                if (
+                  t.isAssignmentExpression(targetNode) &&
+                  t.isStringLiteral(targetNodeRight) &&
+                  t.isMemberExpression(targetNodeLeft)
+                ) {
+                  obj[targetNodeLeft.property.name] = targetNodeRight.value;
+                }
+              }
               if (typeof propKey === "string" && PROTO_METHODS.has(propKey))
                 return;
 
               const targetReplaced = obj[propKey];
-
-              // Reemplazamos si el valor existe en nuestra reconstrucción
               if (targetReplaced !== undefined) {
                 path.replaceWith(t.valueToNode(targetReplaced));
               }
