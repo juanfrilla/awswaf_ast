@@ -10,17 +10,15 @@ if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir);
 
 // step1 webcrack
 const pluginPaths = [
-  "./plugins/fixnumericassignments.js",
-  "./plugins/substitutearrays.js",
-  "./plugins/sequenceexpr.js",
-  "./plugins/replaceconstindicts.js",
-  "./plugins/replacefuncsinobjs.js",
-  //"./plugins/objectpropinliner.js",
+  "./plugins/inlinenumbers.js",
+  "./plugins/replaceconstsfromarrays.js",
+  "./plugins/replaceconstsinsequence.js",
+  "./plugins/replaceconstsfromobjs.js",
+  "./plugins/replacefuncsfromobjs.js",
   "./plugins/substitutedecryptfunctions.js",
   "./plugins/evaluatefuncs.js",
   "./plugins/joinstrings.js",
-  "./plugins/replacefuncsinnonnormobjs.js",
-  "./plugins/simplify_sentences.js",
+  "./plugins/shortensequences.js",
   "./plugins/propdecomputer.js",
   "./plugins/simplifydeadconditions.js",
 ];

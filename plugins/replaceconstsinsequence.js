@@ -54,7 +54,7 @@ export default function (babel) {
   };
   const { types: t } = babel;
   return {
-    name: "inlinesequence",
+    name: "replaceconstsinsequence",
     visitor: visitorSequencer,
   };
 }

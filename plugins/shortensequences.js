@@ -2,7 +2,7 @@ export default function (babel) {
   const { types: t } = babel;
 
   return {
-    name: "simplify-sequences",
+    name: "shortensequences",
     visitor: {
       SequenceExpression(path) {
         const expressions = path.node.expressions;

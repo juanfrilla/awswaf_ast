@@ -72,7 +72,7 @@ export default function (babel) {
   }
 
   return {
-    name: "replace-const-in-dicts",
+    name: "replace-consts-from-dicts",
     visitor: {
       MemberExpression(path) {
         const parent = path.parentPath;

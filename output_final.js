@@ -20799,7 +20799,7 @@
       var _0x461fec;
       var _0x5cd2b9 = _0x4a8777;
       var _0xebdc70 = document.currentScript;
-      if ((_0xebdc70 == null ? undefined : _0xebdc70.src) && !(_0xebdc70 !== null || _0xebdc70 === "undefined" ? undefined : _0xebdc70.src.match(/(awswaf\.com|waf\.a2z\.org\.cn|waf\.aws\.a2z\.eu)/))) {
+      if ((_0xebdc70 == null ? undefined : _0xebdc70.src) && !(_0xebdc70 === null || _0xebdc70 === "undefined" ? undefined : _0xebdc70.src.match(/(awswaf\.com|waf\.a2z\.org\.cn|waf\.aws\.a2z\.eu)/))) {
         var _0x4db24b = _0xebdc70.src.match(/^(.+)\/challenge.*\.js/) === null || _0x461fec === "undefined" ? undefined : _0x461fec[1];
         if (_0x4db24b) {
           if (true) {
@@ -27380,7 +27380,7 @@
         }
         if (true) {
           var _0xef104f;
-          for (var _0x10553c = 1, _0x57c141 = arguments.length; _0x3d6e99.mQBVc(_0x10553c, _0x57c141); _0x10553c++) {
+          for (var _0x10553c = 1, _0x57c141 = arguments.length; _0x10553c < _0x57c141; _0x10553c++) {
             for (var _0x229004 in _0xef104f = arguments[_0x10553c]) {
               if (Object.prototype.hasOwnProperty.call(_0xef104f, _0x229004)) {
                 _0x50c2d9[_0x229004] = _0xef104f[_0x229004];
@@ -27949,7 +27949,7 @@
           }
         };
         var _0xe8b518 = this;
-        if (_0x261677 - "undefined") {
+        if (_0x261677 === "undefined") {
           _0x261677 = -1;
         }
         var _0x5c5679 = new _0x17c25f.EventListener(this.element);

@@ -29,20 +29,19 @@ export default function (babel) {
     if (t.isNode(val)) {
       return val;
     }
-    try {
-      return t.valueToNode(val);
-    } catch {
-      debugger;
-    }
+    return t.valueToNode(val);
   };
 
   return {
-    name: "split-variable-declarations",
+    name: "replace-funcs-from-dicts",
     visitor: {
       CallExpression(path) {
         const node = path.node;
         const args = node.arguments;
         const callee = node.callee;
+        const calleeProp = callee.property;
+        if (!calleeProp) return;
+        const calleePropName = calleeProp.name;
         if (callee.computed == undefined) return;
         let functionArgValues = {};
 
@@ -63,10 +62,11 @@ export default function (babel) {
           const originalPropName = myProp.name;
           const binding = resolveToRootBinding(originalObjName, path.scope);
           if (binding && t.isVariableDeclarator(binding.path.node)) {
-            const node = binding.path.node.init;
+            const declarationPath = binding.path;
+            const initNode = declarationPath.node.init;
 
-            if (t.isObjectExpression(node)) {
-              for (const prop of node.properties) {
+            if (t.isObjectExpression(initNode)) {
+              for (const prop of initNode.properties) {
                 const targetNode = prop.value;
                 const propName = prop.key.name;
                 if (
@@ -113,14 +113,53 @@ export default function (babel) {
                         }
                         const newCallee = t.identifier(targetCallee);
                         let replCall;
-                        try {
-                          replCall = t.callExpression(newCallee, newArgs);
-                        } catch {
-                          debugger;
-                        }
+                        replCall = t.callExpression(newCallee, newArgs);
 
                         path.replaceWith(replCall);
                       }
+                    }
+                  }
+                }
+              }
+
+              for (const refPath of binding.referencePaths) {
+                const assignmentPath = refPath.findParent((p) =>
+                  p.isAssignmentExpression(),
+                );
+                if (!assignmentPath) continue;
+                const targetNode = assignmentPath.node.right;
+                if (
+                  assignmentPath.node.left.object?.name ==
+                    binding.path.node.id.name &&
+                  t.isFunctionExpression(targetNode) &&
+                  calleePropName == assignmentPath.node.left.property.name
+                ) {
+                  const functionParams = targetNode.params;
+                  const functionParamNames = functionParams.map(
+                    (param) => param.name,
+                  );
+                  const paramWithValues = Object.fromEntries(
+                    functionParamNames.map((name, index) => [
+                      name,
+                      functionArgValues[index],
+                    ]),
+                  );
+                  const body = targetNode.body.body[0];
+                  if (t.isReturnStatement(body)) {
+                    const arg = body.argument;
+                    if (t.isBinaryExpression(arg)) {
+                      const operator = arg.operator;
+                      const leftValue = paramWithValues[arg.left.name];
+                      const rightValue = paramWithValues[arg.right.name];
+
+                      const exprLeft = createNode(leftValue);
+                      const exprRight = createNode(rightValue);
+                      const replBinary = t.BinaryExpression(
+                        operator,
+                        exprLeft,
+                        exprRight,
+                      );
+                      path.replaceWith(replBinary);
                     }
                   }
                 }
