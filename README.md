@@ -164,6 +164,14 @@ The result: keywords like `eval`, `document.cookie`, or `XMLHttpRequest` never a
 
 ---
 
+## 📚 References
+
+- [Babel Documentation](https://babeljs.io/docs/) — Official Babel docs. Covers the core API, configuration, and transform pipeline used throughout this project.
+- [Babel Plugin Handbook](https://github.com/jamiebuilds/babel-handbook/blob/master/translations/en/plugin-handbook.md) — The go-to guide for writing Babel plugins. Explains visitors, paths, scopes, and bindings in depth.
+- [AST Explorer](https://astexplorer.net/) — Interactive playground to inspect the AST of any JavaScript snippet in real time. Essential for understanding what nodes to target in each plugin.
+- [AST Explorer (alt)](https://ast-explorer.dev/) — Alternative AST explorer with a modern and cleaner interface that supports additional parsers.
+---
+
 ## ⚠️ Disclaimer
 
 This tool is intended for educational purposes and proactive security research only. Always ensure compliance with the Terms of Service of the platforms you are analyzing.
