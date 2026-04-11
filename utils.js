@@ -30,7 +30,7 @@ export function isPropMutated(binding, propKey) {
     if (t.isAssignmentExpression(mutationPath.node)) {
       if (
         mutationPath.node.operator !== "=" &&
-        mutationPath.node.left === memberPath.node && // <--- CRÍTICO: Comprobar que es la parte izquierda
+        mutationPath.node.left === memberPath.node &&
         memberPath.node.object.name === objName &&
         (memberPath.node.property.name === propKey ||
           memberPath.node.property.value === propKey)

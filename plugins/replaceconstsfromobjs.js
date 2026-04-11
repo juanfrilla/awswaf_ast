@@ -6,10 +6,7 @@ import {
 
 export default function (babel) {
   const { types: t } = babel;
-  // var _0x57a7ad = {
-  //   QvILG: "throw",     ==> 
-  // };
-  // _0x57a7ad.QvILG            "throw"
+
   return {
     name: "replace-consts-from-objs",
     visitor: {

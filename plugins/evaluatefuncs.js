@@ -2,10 +2,6 @@ import _generate from "@babel/generator";
 import vm from "vm";
 import fs from "fs";
 const generator = _generate.default;
-// Hay que evaluar en contextos diferentes e independientes, no vale cambiar el path y evaluar de nuevo pq no da bien
-// e.g. debug_vm_runtime.js
-
-// _0x3d82ab(469, 833); => "challenge_"
 export default function (babel) {
   const { types: t } = babel;
   return {
@@ -60,7 +56,7 @@ export default function (babel) {
                 const exprStatem = arraysFuncRefPath.findParent((p) =>
                   p.isExpressionStatement(),
                 );
-                if (!exprStatem) continue; // puede no tener padre ExpressionStatement
+                if (!exprStatem) continue;
                 const expr = exprStatem.node.expression;
                 if (t.isCallExpression(expr)) {
                   const refArgs = expr.arguments;
@@ -70,8 +66,6 @@ export default function (babel) {
                   }
                 }
               }
-
-              // Generar código AHORA, antes de cualquier sustitución
               cache.set(functionName, {
                 iifeCode,
                 arraysFunctionCode: generator(arraysFunctionPath.node).code,
@@ -81,8 +75,6 @@ export default function (babel) {
 
             const { iifeCode, arraysFunctionCode, decryptorCode } =
               cache.get(functionName);
-
-            // Usar el nodo original (antes de cualquier replace)
             const codeToEvaluate = generator(path.node).code;
 
             const singleEvaluationCode = `/* --- IIFE ROTATION --- */
@@ -107,7 +99,7 @@ ${codeToEvaluate}`;
               path.replaceWith(t.booleanLiteral(result));
             }
 
-            path.skip(); // Evitar revisitar el nodo ya sustituido
+            path.skip();
           },
         });
       },

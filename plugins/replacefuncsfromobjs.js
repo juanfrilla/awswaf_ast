@@ -1,12 +1,8 @@
 import { resolveToRootBinding, createNode } from "../utils.js";
 export default function (babel) {
   const { types: t } = babel;
-
-
-
-  
   return {
-    name: "replace-funcs-from-dicts",
+    name: "replace-funcs-from-objs",
     visitor: {
       CallExpression(path) {
         const node = path.node;

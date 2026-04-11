@@ -15,12 +15,11 @@ const pluginPaths = [
   "./plugins/replaceconstsinsequence.js",
   "./plugins/replaceconstsfromobjs.js",
   "./plugins/replacefuncsfromobjs.js",
-  "./plugins/substitutedecryptfunctions.js",
+  "./plugins/substitutewrapperfunctions.js",
   "./plugins/evaluatefuncs.js",
   "./plugins/evaluatepaths.js",
   "./plugins/shortensequences.js",
   "./plugins/propdecomputer.js",
-  "./plugins/simplifydeadconditions.js",
 ];
 
 function astHash(code) {
@@ -74,14 +73,12 @@ async function runDeobfuscator() {
 
     const hashBeforeRound = astHash(currentCode);
 
-    // Usamos for...of para poder usar await dentro del bucle
     for (let index = 0; index < pluginPaths.length; index++) {
       const pluginPath = pluginPaths[index];
       console.log(`[step ${index + 1}] processing ${pluginPath}`);
 
       const pluginName = path.basename(pluginPath, ".js");
 
-      // CARGA DINÁMICA ESM
       const absolutePath = path.resolve(pluginPath);
       const pluginUrl = pathToFileURL(absolutePath).href;
       const pluginModule = await import(pluginUrl);
@@ -117,5 +114,4 @@ async function runDeobfuscator() {
   console.log(`\n[🏁] Finished process in ${totalIterations} rounds.`);
 }
 
-// Ejecutar el proceso
 runDeobfuscator().catch(console.error);

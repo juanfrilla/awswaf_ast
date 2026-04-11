@@ -1,7 +1,5 @@
 export default function (babel) {
   const { types: t } = babel;
-  // "head > scr" + "ipt" ==> "head > script"
-  // 4294967295 / 128 ==> 33554431.9921875
   return {
     name: "evaluatepaths",
     visitor: {

@@ -1,7 +1,5 @@
 export default function (babel) {
   const { types: t } = babel;
-  //  var _0x402862 = [0, "__generator"]; ==> 
-  //  _0x402862[1];                             "__generator";
   return {
     name: "replaceArrays",
     visitor: {
@@ -25,14 +23,10 @@ export default function (babel) {
             const elements = bindInit.elements;
             const index = targetProp.value;
 
-            // 3. SEGURIDAD: Si el índice no existe en el array original, NO REEMPLAZAR
-            // Esto evita que pongas 'undefined' si el array está vacío o el índice es alto
             if (index >= elements.length) return;
 
             const el = elements[index];
-            if (!el) return; // Por si hay huecos en el array [1,,3]
-
-            // 4. Procesar el elemento
+            if (!el) return;
             if (
               t.isNumericLiteral(el) ||
               t.isStringLiteral(el) ||

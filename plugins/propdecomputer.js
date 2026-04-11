@@ -1,6 +1,5 @@
 export default function (babel) {
   const { types: t } = babel;
-// TODO refactorizar esto
   return {
     name: "property-decomputer",
     visitor: {
