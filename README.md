@@ -174,4 +174,4 @@ The result: keywords like `eval`, `document.cookie`, or `XMLHttpRequest` never a
 
 ## ⚠️ Disclaimer
 
-This tool is intended for educational purposes and proactive security research only. Always ensure compliance with the Terms of Service of the platforms you are analyzing.
+This tool is intended for educational purposes and proactive security research only. Always ensure compliance with the Terms of Service of the platforms you are analyzing, respect robots.txt, don't saturate the target with unnecessary requests and act ethically.
