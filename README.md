@@ -95,12 +95,6 @@ _0x1ce25c[_0x17aa1a = 456, _0x5e33fb = 455, _0x1e095b(_0x5e33fb - 54, _0x17aa1a)
 [_0x31587d = -701, _0x976b4d = -663, "qTonK"] // → "qTonK"
 ```
 
-- **`simplifydeadconditions.js`** — Evaluates static `if` conditions (string literals and binary expressions between literals) and replaces them with `true`/`false`, exposing dead branches for further removal. ⚠️ _Work in progress._
-```js
-if ("someString") { ... }  // → if (true) { ... }
-if (5 - 5) { ... }         // → if (false) { ... }
-```
-
 #### 🧩 Object De-virtualization
 
 - **`replaceconstsfromobjs.js`** — Inlines literal property values from constant object declarations (both inline and post-assignment) directly into their access sites.
