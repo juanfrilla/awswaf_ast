@@ -1,6 +1,7 @@
 node_modules/
-steps/
 todo/
 *lab*
 deobf_webcrack/
 all_plugins/
+steps/*
+!steps/.gitkeep
