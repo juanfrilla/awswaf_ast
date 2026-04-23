@@ -21,18 +21,18 @@ Advanced reverse engineering toolkit designed to analyze, simplify, and deobfusc
 npm install -g webcrack
 npm install
 ```
-
-2. **Pre-process with Webcrack:**
+2. **Create the awswaf.js file with the actual antibot code (I removed it)**
+3. **Pre-process with Webcrack:**
 ```bash
 webcrack awswaf.js -o deobf_webcrack
 ```
 
-3. **Move the output file to the project root:**
+4. **Move the output file to the project root:**
 ```bash
 mv ./deobf_webcrack/deobfuscated.js ./deobfuscated_webcrack.js
 ```
 
-4. **Run the deobfuscator:**
+5. **Run the deobfuscator:**
 ```bash
 node main.js
 ```
